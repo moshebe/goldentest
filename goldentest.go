@@ -74,24 +74,7 @@ func (g Golden[T]) Update(got T) error {
 }
 
 func (g Golden[T]) UpdateValues(got []T) error {
-	results := make([]map[string]any, len(got))
-	for i := range got {
-		encoded, err := g.encoder.Marshal(got[i], g.packed)
-		if err != nil {
-			return fmt.Errorf("marshal(%d): %w", i, err)
-		}
-		m := map[string]any{}
-		err = json.Unmarshal(encoded, &m)
-		if err != nil {
-			return fmt.Errorf("unmarshal(%d): %w", i, err)
-		}
-		results[i] = m
-	}
-	data, err := JSONEncoder{}.Marshal(results, g.packed)
-	if err != nil {
-		return fmt.Errorf("marshal results: %w", err)
-	}
-	return g.Write(data)
+	return g.update(got)
 }
 
 func (g Golden[T]) update(golden any) error {
