@@ -1,0 +1,16 @@
+{
+  "name": "bla",
+  "values": [
+    1,
+    2,
+    3
+  ],
+  "barbi": {
+    "bla": "blabla1",
+    "env": {
+      "ACCOUNT": "1234",
+      "ID": "4321",
+      "OTHER": "STUFF"
+    }
+  }
+}
