@@ -113,6 +113,7 @@ func (g Golden[T]) cmp(want, got *T) (CompareResult[T], error) {
 	}, nil
 }
 
+// TODO: maybe JSON can call this one instead of compare values
 func (g Golden[T]) Compare(got *T) (CompareResult[T], error) {
 	goldenData, err := os.ReadFile(g.path)
 	if err != nil {
@@ -129,6 +130,45 @@ func (g Golden[T]) Compare(got *T) (CompareResult[T], error) {
 }
 
 func (g Golden[T]) CompareValues(gotValues []T) (map[int]CompareResult[T], error) {
+	result := make(map[int]CompareResult[T])
+
+	goldenData, err := os.ReadFile(g.path)
+	if err != nil {
+		return result, fmt.Errorf("read file: %w", err)
+	}
+
+	var wantValues []T
+	err = g.encoder.Unmarshal(goldenData, &wantValues)
+	if err != nil {
+		return result, fmt.Errorf("unmarshal golden values: %w", err)
+	}
+
+	if len(gotValues) != len(wantValues) {
+		return result, fmt.Errorf("want %d items but got %d", len(wantValues), len(gotValues))
+	}
+
+	if len(wantValues) == 0 {
+		return result, nil
+	}
+
+	for i := range gotValues {
+		want := wantValues[i]
+		got := gotValues[i]
+
+		res, err := g.cmp(&want, &got)
+		if err != nil {
+			return result, err
+		}
+		if res.OK() {
+			continue
+		}
+		result[i] = res
+	}
+
+	return result, nil
+}
+
+func (g Golden[T]) CompareElements(gotValues []T) (map[int]CompareResult[T], error) {
 	result := make(map[int]CompareResult[T])
 
 	goldenData, err := os.ReadFile(g.path)
@@ -251,22 +291,5 @@ func (j ProtoJSONEncoder) Unmarshal(data []byte, v any) error {
 	if v == nil {
 		return fmt.Errorf("missing value")
 	}
-
-	kind := reflect.TypeOf(v).Kind()
-	if kind != reflect.Slice {
-		return j.unmarshal(data, v)
-	}
-
-	//values := reflect.ValueOf(v)
-	var values []any
-	//results := make([]any, 0, values.Len())
-
-	err := json.Unmarshal(data, &values)
-	if err != nil {
-		return fmt.Errorf("unmarshal results: %w", err)
-	}
-
-	v = values
-	//json.Unmarshal()
-	return nil
+	return j.unmarshal(data, v)
 }
