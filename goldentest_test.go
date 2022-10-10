@@ -145,39 +145,3 @@ func TestUpdateValues(t *testing.T) {
 	err := g.UpdateValues(got)
 	require.NoError(t, err)
 }
-
-func TestCompareValuesProto(t *testing.T) {
-	t.Skip("protobuf not fully implemented")
-	got := []*pb.Span{
-		{
-			Name:   "First",
-			SpanId: "1",
-		},
-		{
-			Name:   "Second",
-			SpanId: "2",
-		},
-	}
-
-	g := New[*pb.Span](path.Join("testdata", "update_multiple.golden.proto.json")).WithEncoder(ProtoJSONEncoder{})
-	res, err := g.CompareValues(got)
-	require.NoError(t, err)
-	require.Empty(t, res)
-}
-
-func TestUpdateValuesProto(t *testing.T) {
-	got := []*pb.Span{
-		{
-			Name:   "First",
-			SpanId: "1",
-		},
-		{
-			Name:   "Second",
-			SpanId: "2",
-		},
-	}
-
-	g := New[*pb.Span](path.Join("testdata", "update_multiple.golden.proto.json")).WithEncoder(ProtoJSONEncoder{})
-	err := g.UpdateValues(got)
-	require.NoError(t, err)
-}

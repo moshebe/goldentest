@@ -113,7 +113,6 @@ func (g Golden[T]) cmp(want, got *T) (CompareResult[T], error) {
 	}, nil
 }
 
-// TODO: maybe JSON can call this one instead of compare values
 func (g Golden[T]) Compare(got *T) (CompareResult[T], error) {
 	goldenData, err := os.ReadFile(g.path)
 	if err != nil {
